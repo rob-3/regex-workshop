@@ -26,8 +26,280 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h2>A Brief Intro to Regular Expressions</h2>
+					What is this? By the end of this workshop you should know
+					how to decipher it, and why it is useful.
+					<pre><code data-trim>
+					/^\(?(\d{3})\)?[ -]?(\d{3})[ -]?(\d{4})$/
+					</code></pre>
+					<footer>(If you know what it is, please don't tell until the
+						end!)</footer>
+				</section>
+				<section>
+					<h2>Why regular expressions?</h2>
+					<ul>
+						<li>Widely supported</li>
+						<li>Fast — most regexes runs in O(n) time*</li>
+						<li>Parsing/validating user input</li>
+						<li>Advanced find/replace in good text editors</li>
+						<li>Awesome feeling when you write a regex</li>
+					</ul>
+				</section>
+				<section>
+					<h2>The Trivial Regex</h2>
+					Most characters in regular expressions stand for themselves.
+					The most basic regex is simply a standard substring search.
+					<pre><code data-trim class="js">
+					const regex = /Hack/;
+					regex.test("Hack"); // true
+					regex.test("Knight Hacks"); // true
+					regex.test("Hack@UCF"); // true
+					regex.test("hackathon"); // false
+					</code></pre>
+				</section>
+				<section>
+					<h2>Wildcards</h2>
+					The <code>.</code> character is the wildcard character. It
+					will match any single character, but it must match a
+					character for the regex to match. It does not match
+					<code>\n</code> or <code>\r</code> by default.
+					<pre><code data-trim class="js">
+					const regex = /.ello/;
+					regex.test("hello"); // true
+					regex.test(" ello"); // true
+					regex.test("portobello mushrooms"); // true
+					regex.test("ello"); // false
+					</code></pre>
+				</section>
+				<section>
+					<h2>Character Classes</h2>
+					Character classes are a way to allow one of several
+					different characters to be in a given location.
+					<pre><code data-trim class="js">
+						const regex = /[cpu]ine/;
+						regex.test("cinema"); // true
+						regex.test("vaccine"); // true
+						regex.test("pine tree"); // true
+						regex.test("hydroxychloroquine"); // true
+						regex.test("wine is not an emulator"); // false
+					</code></pre>
+				</section>
+				<section>
+					<h2>Built-In Character Classes</h2>
+					There are many useful built-in character classes.
+					<ul>
+						<li><code>\d</code> matches any digit.</li>
+						<li><code>\w</code> matches a "word character" which can be any letter, number, or the _.</li>
+						<li><code>\s</code> matches any whitespace character.</li>
+						<li><code>\D</code>, <code>\W</code>, and
+							<code>\S</code> match their inverse.</li>
+					</ul>
+					<pre><code data-trim class="js">
+					const regex = /\s\w\S\d\D/;
+					regex.test(" C-3PO"); // true
+					regex.test("	qw3rty"); // true
+					</code></pre>
+					<aside class="notes">
+						The wildcard is really just a very general character
+						class.
+					</aside>
+				</section>
+				<section>
+					<h2>Ranges and Inverses in Character Classes</h2>
+					Sometimes you want to allow a range or letters or numbers
+					only, or you want the inverse of a class.
+					<pre><code data-trim class="js">
+					const regex = /[A-C][0-3][0-9]/;
+					// const regex = /[^\Wa-zD-Z0-9_][0-3][0-9]/;
+					regex.test("A30"); // true
+					regex.test("B09"); // true
+					regex.test("C9"); // false
+					regex.test("D12"); // false
+					</code></pre>
+					<aside class="notes">
+						Airline boarding numbers
+					</aside>
+				</section>
+				<section>
+					<h2>Anchors: <code>^</code> and <code>$</code></h2>
+					An anchor represents the beginning (<code>^</code>) or end
+					(<code>$</code>) of the string.
+					<pre><code data-trim class="js">
+					const regex = /^r/;
+					regex.test("rob"); // true
+					regex.test("chris"); // false
+					const regex2 = /ing$/;
+					regex2.test("zooming"); // true
+					regex2.test("social distancing"); // true
+					regex2.test("getting groceries"); //false
+					const regex3 = /^hello, world!$/;
+					regex3.test("hello, world!"); // true
+					regex3.test(" hello, world!"); // false
+					</code></pre>
+				</section>
+				<section>
+					<h2>Quantifiers: <code>*</code>, <code>+</code>, and <code>?</code></h2>
+					<p>Quantifiers let you match a certain amount of a given
+						character.</p>
+					<ul>
+						<li><code>*</code> matches 0 or more</li>
+						<li><code>+</code> matches 1 or more</li>
+						<li><code>?</code> matches 0 or 1</li>
+					</ul>
+					<pre><code data-trim class="js">
+					const regex = /.*@.+/;
+					regex.match("robert@knighthacks.org"); // true
+					regex.match("@rob-3"); // true
+					regex.match("Rob@"); // false
+					</code></pre>
+					<aside class="fragment">
+						.* is a very common regex for matching unlimited of any
+						character.
+					</aside>
+				</section>
+				<section>
+					<h2>Quantifiers: <code>{n}</code> and friends</h2>
+					Using <code>{n}</code> allows you to specify a range of
+					repeats that are allowed.
+					<pre><code data-trim class="js">
+					const regex = /mo{2,}/;
+					regex.exec("moo"); // [ "moo" ]
+					regex.exec("moooooo"); // [ "moooooo" ]
+					regex.exec("moooooooooo"); // [ "moooooooooo" ]
+					const worseRegex = /mo{2}/;
+					worseRegex.exec("mooooooo"); // [ "moo" ]
+					</code></pre>
+				</section>
+				<section>
+					<h2>Escaping</h2>
+					If you actually want to match a character with special
+					purpose, you can escape it with <code>\</code>.
+					<pre><code class="js" data-trim>
+					const regex = /\$\d+\.\d{2}/;
+					regex.test("$2.99"); // true
+					regex.test("$19.99"); // true
+					regex.test("$4099"); // false
+					regex.test("$.99"); // false
+					</code></pre>
+				</section>
+				<section>
+					<h2>Groups</h2>
+					A group can be used to treat a chunk of regex as a
+					character. This is useful for many operators.
+					<pre><code data-trim class="js">
+					const singingRegex = /^(fa )?(la )+la$/;
+					singingRegex.test("la la"); // true
+					singingRegex.test("fa la"); // false
+					singingRegex.test("fa la la"); // true
+					singingRegex.test("fa la la la la la la la la"); // true
+					</code></pre>
+				</section>
+				<section>
+					<h2><code>|</code> in Groups</h2>
+					<code>|</code> works like an "or" operation, where only one
+					of the options in the group has to match.
+					<pre><code data-trim class="js">
+					const regex = /^(Knight|Swamp|Shell)Hacks$/;
+					regex.test("KnightHacks");
+					regex.test("SwampHacks");
+					regex.test("ShellHacks");
+					</code></pre>
+					<aside class="notes">
+						Good for handling different variations of a word like
+						"Drive", "Dr", and "Dr.". Don't use | in a character
+						class, it will add | as an option and not do what you
+						want.
+					</aside>
+				</section>
+				<section>
+					<h2>Capturing</h2>
+					Using <code>String.prototype.match(re)</code>, you can
+					"capture" values in groups. This is useful for reading
+					consistent data out of various formats.
+					<pre><code data-trim class="js">
+					const simpleDateRegex = /^(\d{4})[-/](\d{2})[-/](\d{2})$/;
+					const matches = "2021-01-28".match(simpleDateRegex); 
+					// matches === ["2021-01-28", "2021", "01", "28"]
+					const matches2 = "2021/01/28".match(simpleDateRegex);
+					// matches2 === ["2021/01/28", "2021", "01", "28"]
+					</code></pre>
+				</section>
+				<section>
+					<h2>Lookahead</h2>
+					Sometimes you only want to match when there is a certain
+					regex coming up.
+					<pre><code class="js" data-trim>
+					const streetRegex = /(.*) (?=(St|Dr|Ln|Rd|Blvd))/;
+					const matches = "University Blvd".match(streetRegex);
+					// matches === [ "University ", "University", "Blvd" ]
+					</code></pre>
+				</section>
+				<section>
+					<h2>Lookbehind</h2>
+					Lookbehind is like lookahead but for prefixes.
+					<pre><code class="js" data-trim>
+					const doctorRegex = /(?&lt;=Dr\. )\w+/;
+					const matches = "Dr. Feltner".match(doctorRegex);
+					// matches === [ "Feltner" ]
+					</code></pre>
+					<aside class="notes">
+						Some implementations don't have lookaround because it
+						does blow up time complexity.
+					</aside>
+				</section>
+				<section>
+					<h2>Other Stuff</h2>
+					<ul>
+						<li>Backreferences</li>
+						<li>Non-capturing groups</li>
+						<li>Named capturing groups</li>
+						<li>Negative lookaround assertions</li>
+						<li>Greedy vs non-greedy</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Regex Flavors</h2>
+					<ul>
+						<li>Different programs might have some variation in
+							their implementation of regexes.</li>
+						<li>This is JavaScript regex and most implementations
+							are similar.</li>
+						<li>Main differences come from what is escaped and
+							feature extensions.</li>
+					</ul>
+				</section>
+				<section>
+					<h1>Examples</h1>
+				</section>
+				<section>
+					<h2>Refactoring Code Demo</h2>
+				</section>
+				<section>
+					<h2>Validating a UCF NID</h2>
+					UCF NIDs are two lowercase letters plus six numbers.
+					<pre><code data-trim class="js">
+					const ucfNidRegex = /^[a-z]{2}\d{6}$/;
+					ucfNidRegex.test("ab123456"); // true
+					ucfNidRegex.test("Ca423643"); // false
+					</code></pre>
+				</section>
+				<section>
+					<h2>Finally: What You Came to See</h2>
+					What is this? Go ahead and try to work it out.
+					<pre><code data-trim>
+					/^\(?(\d{3})\)?[ -]?(\d{3})[ -]?(\d{4})$/
+					</code></pre>
+					<div class="fragment">
+						It matches phone numbers!
+					</div>
+				</section>
+				<section>
+					<h2>Acknowledgements</h2>
+					Special thanks to MDN's awesome documentation and
+					<a href="https://regexr.com/">https://regexr.com/</a>
+					for making this workshop possible.
+				</section>
 			</div>
 		</div>
 
